@@ -118,3 +118,13 @@ export const StartCounterButton = styled.button`
     background: ${props => props.theme["green-700"]};
   }
 `;
+
+export const ErrorContainer = styled.div`
+  height: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: flex-start;
+
+  margin-top: 1rem;
+`;
