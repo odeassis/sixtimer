@@ -1,7 +1,8 @@
-import { Play } from "phosphor-react";
+import { HandPalm, Play } from "phosphor-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as zod from "zod";
+import { differenceInSeconds } from "date-fns";
 
 import {
   CounterContainer,
@@ -11,9 +12,12 @@ import {
   MinutesAmountInput,
   Separator,
   StartCounterButton,
+  StopCounterButton,
   TaskInput,
 } from "./styles";
 import { MessageError } from "../../components/MessageError";
+import { number, string } from "zod";
+import { useEffect, useState } from "react";
 
 const newCycleFormValidationSchema = zod.object({
   task: zod.string().min(3, "A tarefa deve ter no mínimo 3 letras."),
@@ -26,6 +30,14 @@ const newCycleFormValidationSchema = zod.object({
 
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>;
 
+interface Cycle {
+  id: string;
+  task: string;
+  minutesAmount: number;
+  startTask: Date;
+  interruptCycle?: Date;
+}
+
 export function Home() {
   const { register, handleSubmit, watch, formState, reset } = useForm({
     resolver: zodResolver(newCycleFormValidationSchema),
@@ -35,9 +47,72 @@ export function Home() {
     },
   });
 
-  function handleCreateNewCycle() {
+  const [cycles, setCycles] = useState<Cycle[]>([]);
+  const [activeCycleId, setActiveCycleId] = useState("");
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState(0);
+
+  function handleCreateNewCycle(data: NewCycleFormData) {
+    const id = String(new Date().getTime());
+
+    const newCycle: Cycle = {
+      id,
+      task: data.task,
+      minutesAmount: data.minutesAmount,
+      startTask: new Date(),
+    };
+
+    setCycles((state) => [...state, newCycle]);
+    setActiveCycleId(id);
+    setAmountSecondsPassed(0);
+
     reset();
   }
+
+  function handleStopCycle() {
+    setCycles(
+      cycles.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, interruptCycle: new Date() };
+        } else {
+          return cycle;
+        }
+      })
+    );
+
+    setActiveCycleId("");
+  }
+
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
+
+  useEffect(() => {
+    let interval: number;
+    if (activeCycle) {
+      interval = setInterval(() => {
+        setAmountSecondsPassed(
+          differenceInSeconds(new Date(), activeCycle.startTask)
+        );
+      }, 1000);
+    }
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [activeCycle]);
+
+  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0;
+  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0;
+
+  const minutesAmount = Math.floor(currentSeconds / 60);
+  const secondsAmount = currentSeconds % 60;
+
+  const minutes = String(minutesAmount).padStart(2, "0");
+  const seconds = String(secondsAmount).padStart(2, "0");
+
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `${minutes}:${seconds}`;
+    }
+  }, [minutes, seconds, activeCycle]);
 
   const task = watch("task");
   const isSubmitDisabled = !task;
@@ -52,6 +127,7 @@ export function Home() {
             id="task"
             list="task-suggestions"
             placeholder="Dê um nome para sua tarefa"
+            disabled={!!activeCycle}
             {...register("task")}
           />
 
@@ -70,6 +146,7 @@ export function Home() {
             min={5}
             step={5}
             placeholder="00"
+            disabled={!!activeCycle}
             {...register("minutesAmount", {
               valueAsNumber: true,
             })}
@@ -78,17 +155,24 @@ export function Home() {
           <span>minutos</span>
         </FormContainer>
         <CounterContainer>
-          <span>0</span>
-          <span>0</span>
+          <span>{minutes[0]}</span>
+          <span>{minutes[1]}</span>
           <Separator>:</Separator>
-          <span>0</span>
-          <span>0</span>
+          <span>{seconds[0]}</span>
+          <span>{seconds[1]}</span>
         </CounterContainer>
 
-        <StartCounterButton type="submit" disabled={isSubmitDisabled}>
-          <Play size={24} />
-          Iniciar
-        </StartCounterButton>
+        {activeCycle ? (
+          <StopCounterButton onClick={handleStopCycle} type="button">
+            <HandPalm size={24} />
+            Interromper
+          </StopCounterButton>
+        ) : (
+          <StartCounterButton type="submit" disabled={isSubmitDisabled}>
+            <Play size={24} />
+            Iniciar
+          </StartCounterButton>
+        )}
       </form>
       <ErrorContainer>
         {Object.entries(formState.errors).map((key, value) => (
