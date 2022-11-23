@@ -20,6 +20,11 @@ interface CyclesContextProviderProps {
 
 interface CycleContextType {
   activeCycle: Cycle | undefined;
+  amountSecondsPassed: number;
+  createNewCycle: (data: NewCycleFormData) => void;
+  stopCycle: () => void;
+  completeCycle: () => void;
+  secondsPassed: (seconds: number) => void;
 }
 
 export const CycleContext = createContext({} as CycleContextType);
@@ -60,10 +65,35 @@ export function CyclesContextProvider({
     setActiveCycleId("");
   }
 
+  function completeCycle() {
+    setCycles((state) =>
+      state.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, completeAt: new Date() };
+        } else {
+          return cycle;
+        }
+      })
+    );
+  }
+
+  function secondsPassed(seconds: number) {
+    setAmountSecondsPassed(seconds);
+  }
+
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
 
   return (
-    <CycleContext.Provider value={{ activeCycle }}>
+    <CycleContext.Provider
+      value={{
+        activeCycle,
+        createNewCycle,
+        stopCycle,
+        amountSecondsPassed,
+        completeCycle,
+        secondsPassed,
+      }}
+    >
       {children}
     </CycleContext.Provider>
   );
