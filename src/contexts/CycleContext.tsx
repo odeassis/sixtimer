@@ -20,6 +20,7 @@ interface CyclesContextProviderProps {
 
 interface CycleContextType {
   activeCycle: Cycle | undefined;
+  cycles: Cycle[];
   amountSecondsPassed: number;
   createNewCycle: (data: NewCycleFormData) => void;
   stopCycle: () => void;
@@ -87,6 +88,7 @@ export function CyclesContextProvider({
     <CycleContext.Provider
       value={{
         activeCycle,
+        cycles,
         createNewCycle,
         stopCycle,
         amountSecondsPassed,
