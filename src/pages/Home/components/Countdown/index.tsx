@@ -4,8 +4,12 @@ import { CycleContext } from "../../../../contexts/CycleContext";
 import { CounterContainer, Separator } from "./styles";
 
 export function Countdown() {
-  const { activeCycle, amountSecondsPassed, completeCycle, secondsPassed } =
-    useContext(CycleContext);
+  const {
+    activeCycle,
+    amountSecondsPassed,
+    markCurrentCycleAsFinished,
+    secondsPassed,
+  } = useContext(CycleContext);
 
   const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0;
   const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0;
@@ -22,11 +26,11 @@ export function Countdown() {
       interval = setInterval(() => {
         const secondsDifference = differenceInSeconds(
           new Date(),
-          activeCycle.startTask
+          new Date(activeCycle.startTask)
         );
 
         if (secondsDifference >= totalSeconds) {
-          completeCycle();
+          markCurrentCycleAsFinished();
           secondsPassed(totalSeconds);
           clearInterval(interval);
         } else {
