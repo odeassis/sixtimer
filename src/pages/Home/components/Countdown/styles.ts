@@ -21,5 +21,5 @@ export const Separator = styled.div`
   align-items:center;
   justify-content:center;
 
-  color: ${props => props.theme["green-500"]}
+  color: ${props => props.theme["purple-500"]}
 `;

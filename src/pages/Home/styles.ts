@@ -43,7 +43,7 @@ export const BaseCounterButton = styled.button`
 `;
 
 export const StartCounterButton = styled(BaseCounterButton)`
-  background: ${props => props.theme["green-500"]};
+  background: ${props => props.theme["purple-500"]};
 
   &:disabled{
     opacity: 0.7;
@@ -51,7 +51,7 @@ export const StartCounterButton = styled(BaseCounterButton)`
   }
 
   &:not(:disabled):hover{
-    background: ${props => props.theme["green-700"]};
+    background: ${props => props.theme["purple-700"]};
   }
 `;
 export const StopCounterButton = styled(BaseCounterButton)`
