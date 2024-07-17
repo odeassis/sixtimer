@@ -84,11 +84,3 @@ To get started with the project, follow these steps:
    ```sh
    npm run build
    ```
-
-## Contribution
-
-Please refer to the [README.md](README.md) for guidelines on how to contribute to this project.
-
----
-
-This resume provides a high-level overview of the project structure, key features, and steps to get started.
